@@ -1,0 +1,17 @@
+# The number of masters, dedicated etcd cluster members and nodes to provision
+num_masters: 1
+num_etcd: 0
+num_nodes: 1
+
+# Determine the OS platform to use
+os_image: "centos/atomic-host"
+
+# Define the number of CPUs
+vm_master_cpus: 1
+vm_etcd_cpus: 1
+vm_node_cpus: 1
+
+# Define the ammount of RAM
+vm_master_mem: 1024
+vm_etcd_mem: 1024
+vm_node_mem: 2048

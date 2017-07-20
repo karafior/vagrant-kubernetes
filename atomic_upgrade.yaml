@@ -1,0 +1,10 @@
+---
+- name: Atomic Host upgrade
+  hosts: all
+  become: yes
+  tasks:
+
+  # Upgrade the atomic host platform to the latest version (atomic host upgrade)
+  - name: Atomic Host upgrade
+    atomic_host:
+      revision: latest

@@ -1,0 +1,16 @@
+---
+# This playbook deploys a kubernetes cluster
+# with the default addons.
+
+- hosts: all
+  gather_facts: false
+  become: yes
+
+# Upgrade the Atomic Host to latest version
+- include: atomic_upgrade.yaml
+
+# Extend the Docker LVM to 100%FREE of the backing VG
+- include: grow_docker_vg.yaml
+
+# Intstall Kubernetes master components via RPM-OSTree
+- include: atomic_k8s_apiserver.yaml

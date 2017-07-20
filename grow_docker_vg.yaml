@@ -1,0 +1,68 @@
+---
+# This playbook grows the docker LVM to 100%FREE of the backing VG
+#
+# Based on: https://github.com/openshift/openshift-ansible/blob/master/playbooks/adhoc/grow_docker_vg/grow_docker_vg.yml
+#
+
+- name: Grow the docker volume group
+  hosts: all
+  become: yes
+#  user: root
+#  connection: ssh
+  gather_facts: no
+
+  pre_tasks:
+  - name: start docker
+    service:
+      name: docker
+      state: started
+
+  - name: Determine if Storage Driver (docker info) is devicemapper
+    shell: docker info | grep 'Storage Driver:.*devicemapper'
+    register: device_mapper_check
+    ignore_errors: yes
+
+  - debug:
+      var: device_mapper_check
+
+  - name: fail if we don't detect devicemapper
+    fail:
+      msg: The "Storage Driver" in "docker info" is not set to "devicemapper"! Please investigate manually.
+    when: device_mapper_check.rc == 1
+
+  # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
+  # and find the volume group.
+  - name: Attempt to find the Volume Group that docker is using
+    shell: lvs | grep docker-pool | awk '{print $2}'
+    register: docker_vg_name
+    ignore_errors: yes
+
+  - debug:
+      var: docker_vg_name
+
+  - name: fail if we don't find a docker volume group
+    fail:
+      msg: Unable to find docker volume group. Please investigate manually.
+    when: docker_vg_name.stdout_lines|length != 1
+
+  # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
+  # and find the physical volume.
+  - name: Attempt to find the Phyisical Volume that docker is using
+    shell: "pvs | grep {{ docker_vg_name.stdout }} | awk '{print $1}'"
+    register: docker_pv_name
+    ignore_errors: yes
+
+  - debug:
+      var: docker_pv_name
+
+  - name: fail if we don't find a docker physical volume
+    fail:
+      msg: Unable to find docker physical volume. Please investigate manually.
+    when: docker_pv_name.stdout_lines|length != 1
+
+  - name: Extend the docker lvm
+#    command: "lvextend --extents '+100%FREE' /dev/{{ docker_vg_name.stdout }}/docker-pool"
+    lvol:
+      vg: "{{ docker_vg_name.stdout }}"
+      lv: docker-pool
+      size: +100%FREE

@@ -1,0 +1,9 @@
+---
+- name: Intstall Kubernetes master components via RPM-OSTree
+  hosts: masters
+  become: yes
+  tasks:
+
+  # Use RPM-OSTree to install kubernetes-master RPM on top of Atomic Host
+  - name: Install Kubernetes master components via RPM-OSTree
+    command: rpm-ostree install kubernetes-master
