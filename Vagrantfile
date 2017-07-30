@@ -6,10 +6,10 @@ require 'yaml'
 dir = File.dirname(File.expand_path(__FILE__))
 
 # defaults
-config = YAML::load_file("#{dir}/defaults.yaml")
+config = YAML::load_file("#{dir}/config/defaults.yaml")
 
-if File.exist?("#{dir}/config.yaml")
-  config_settings = YAML::load_file("#{dir}/config.yaml")
+if File.exist?("#{dir}/config/config.yaml")
+  config_settings = YAML::load_file("#{dir}/config/config.yaml")
   config.merge!(config_settings)
 end
 
@@ -95,7 +95,7 @@ Vagrant.configure("2") do |config|
 #    nmcli con up "System eth0"
 #  SHELL
 
-  # Use ansible provisioning to"
+  # Use ansible provisioning to:
   # - expand the docker-pool to maximum
   # - update the Atomic Host
   config.vm.provision "ansible" do |ansible|
